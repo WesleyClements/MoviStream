@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var movieArray = [
   {name: "Abraham Lincoln",year: 1930},
   {name: "Africa Screams",year: 1949},
@@ -149,6 +150,10 @@ var movieArray = [
   {name: "Wives Under Suspicion", year: 1938}
 ];
 
+function makeYoutubeIframe(videoURL) {
+  let iframe = `<iframe width="560" height="315" src="https://www.youtube.com/embed/eyMKA4d35dg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+}
+
 const navSlide = () => {
   const burger = document.querySelector('.burger');
   const nav = document.querySelector('.nav-links');
@@ -176,3 +181,6 @@ const navSlide = () => {
 
 navSlide();
 
+=======
+let test = '';
+>>>>>>> inital commit
