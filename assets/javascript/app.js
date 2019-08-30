@@ -146,4 +146,5 @@ var movieArray = [
   {name: "The Wasp Woman", year: 1959},
   {name: "West of the Divide", year: 1934},
   {name: "White Zombie", year: 1932},
-  {name: "Wives Under Suspicion", year: 1938}];
+  {name: "Wives Under Suspicion", year: 1938}
+];
