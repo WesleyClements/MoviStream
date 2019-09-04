@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 var movieArray = [
   { name: 'Abraham Lincoln', year: 1930 },
   { name: 'Africa Screams', year: 1949 },
@@ -284,6 +283,3 @@ $(document).ready(() => {
   navSlide();
   refreshFilmList();
 });
-=======
-let test = '';
->>>>>>> 6cfa16e291dac3574463940b4ce3caf4f4ce4be6
