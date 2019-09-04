@@ -149,6 +149,8 @@ var movieArray = [
   {name: "Wives Under Suspicion", year: 1938}
 ];
 
+var downloadLink;
+
 const navSlide = () => {
   const burger = document.querySelector('.burger');
   const nav = document.querySelector('.nav-links');
@@ -176,3 +178,28 @@ const navSlide = () => {
 
 navSlide();
 
+// URL ripper code starts here
+//URL will come from youtube api and not be hardcoded
+url = 'nfWlot6h_JM';
+
+var youtubeURLRip = 'https://getvideo.p.rapidapi.com/?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' + url;
+
+var settings = {
+	"async": true,
+	"crossDomain": true,
+	"url": youtubeURLRip,
+	"method": "GET",
+	"headers": {
+		"x-rapidapi-host": "getvideo.p.rapidapi.com",
+		"x-rapidapi-key": "a4aed55e02mshaa114b38bc3f970p11239fjsn6ea45666c466"
+	}
+}
+// the API here sometimes fails. if it fails, don't show a download link. Will add JQuery later
+$.ajax(settings).done(function (response) {
+	if (response.message === "Successfully received info."){
+    downloadLink = response.streams[0].url;
+  } else {
+    return;
+  }
+});
+//URL ripper code ends here
