@@ -203,3 +203,15 @@ $.ajax(settings).done(function (response) {
   }
 });
 //URL ripper code ends here
+
+//OMDB code starts here
+var searchOMDB = function(movie, year) {
+  var queryURL = "https://www.omdbapi.com/?apikey=89c83bfd&t=" + movie + '&type=movie&plot=short&y=' + year;
+  $.ajax({
+    url: queryURL,
+    method: "GET"
+  }).then(function(response) {
+    console.log(response);
+    })
+  };
+  //OMDB code ends here
