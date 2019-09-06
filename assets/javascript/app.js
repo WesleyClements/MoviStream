@@ -322,7 +322,47 @@ var searchOMDB = function(movie, year) {
 };
 //OMDB code ends here
 
+
 $(document).ready(() => {
   navSlide();
   refreshFilmList();
 });
+
+// URL ripper code starts here
+//URL will come from youtube api and not be hardcoded
+url = 'nfWlot6h_JM';
+
+var youtubeURLRip = 'https://getvideo.p.rapidapi.com/?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' + url;
+
+var settings = {
+	"async": true,
+	"crossDomain": true,
+	"url": youtubeURLRip,
+	"method": "GET",
+	"headers": {
+		"x-rapidapi-host": "getvideo.p.rapidapi.com",
+		"x-rapidapi-key": "a4aed55e02mshaa114b38bc3f970p11239fjsn6ea45666c466"
+	}
+}
+// the API here sometimes fails. if it fails, don't show a download link. Will add JQuery later
+$.ajax(settings).done(function (response) {
+	if (response.message === "Successfully received info."){
+    downloadLink = response.streams[0].url;
+  } else {
+    return;
+  }
+});
+//URL ripper code ends here
+
+//OMDB code starts here
+var searchOMDB = function(movie, year) {
+  var queryURL = "https://www.omdbapi.com/?apikey=89c83bfd&t=" + movie + '&type=movie&plot=short&y=' + year;
+  $.ajax({
+    url: queryURL,
+    method: "GET"
+  }).then(function(response) {
+    console.log(response);
+    })
+  };
+  //OMDB code ends here
+
