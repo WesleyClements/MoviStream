@@ -149,12 +149,11 @@ var movieArray = [
   { name: 'Wives Under Suspicion', year: 1938 }
 ];
 
-movieArray.sort(function (a,b){
-  var nameA = a.name.toUpperCase();
-  var nameB = b.name.toUpperCase();
-  // console.log(nameA);
-  console.log(nameB);
-});
+// movieArray.sort(function (a,b){
+//   var nameA = a.name.toUpperCase();
+//   var nameB = b.name.toUpperCase();
+//   console.log(nameA);
+// });
 
 
 var downloadLink;
