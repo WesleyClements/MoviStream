@@ -317,9 +317,7 @@ function loadFilmList() {
         return films;
       });
   }
-  return new Promise((resolve) => {
-    return filmDatabase.films;
-  });
+  return new Promise((resolve) => resolve(filmDatabase.films));
 }
 
 function getYoutubeVideo(film) {
@@ -367,59 +365,55 @@ loadFilmList().then((filmList) => {
   //getYoutubeVideo(films[0]);
 });
 
-};
+$(document).ready(() => {
+  navSlide();
+  loadFilmList().then((filmList) => {
+    films = filmList;
+    //getYoutubeVideo(films[0]);
+    console.log(films);
+    if (top.location.pathname === '/movies.html'){
+      displayFilmList();
+      }
+  });
+
+
+});
 //URL ripper code ends here
 
-//OMDB code starts here
-var searchOMDB = function(movie, year) {
-  var queryURL = "https://www.omdbapi.com/?apikey=89c83bfd&t=" + movie + '&type=movie&plot=short&y=' + year;
-  $.ajax({
-    url: queryURL,
-    method: "GET"
-  }).then(function(response) {
-    console.log(response);
-    })
-  };
-  //OMDB code ends here
 
   var displayFilmList = function() {
     for (i=0; i< films.length; i++){
-      $("#movieTable").append('<tr class="movieLink"><td id="' + films[i].title + '">' + films[i].title + '</td><td class="releaseYear" id="' + films[i].releaseYear + '">' + films[i].releaseYear + '</td><td>' + films[i].director + '</td></tr>');
+      $("#movieTable").append('<tr class="movieLink" id="' + [i] + '"><td id="' + films[i].title + '">' + films[i].title + '</td><td class="releaseYear" id="' + films[i].releaseYear + '">' + films[i].releaseYear + '</td><td>' + films[i].directors + '</td></tr>');
     }
   };
 
   $('#movieTable').on('click', '.movieLink', function() {
     var currentMovieName = $(this).children(":first").attr('id');
     var currentMovieYear = $(this).children(":first").next().attr('id');
-    displayIndividualFilm(currentMovieName, currentMovieYear);
+    var index = $(this).attr('id');
+    displayIndividualFilm(currentMovieName, currentMovieYear, index);
   });
 
   
-  var displayIndividualFilm = function(movie, year) {
-  displayOMDB(movie, year);
+  var displayIndividualFilm = function(movie, year, index) {
+  displayOMDB(index);
   };
   
-  var displayOMDB = function(movie, year) {
-    var queryURL = "https://www.omdbapi.com/?apikey=89c83bfd&t=" + movie + '&type=movie&plot=short&y=' + year;
-    $.ajax({
-      url: queryURL,
-      method: "GET"
-    }).then(function(response) {
-      $("#movieTable").hide();
-      console.log(response);
-      $("#omdbDisplay").append('<h1 id="movieLabel">Title</h1>');
-      $("#omdbDisplay").append('<h1 id="movieText">' + response.Title + "</h1>");
-      $("#omdbDisplay").append('<img src="' + response.Poster + '"' + 'alt="Poster" </img>')
-      $("#omdbDisplay").append('<h1 id="movieLabel">Released</h1>');
-      $("#omdbDisplay").append('<h1 id="movieText">' + response.Released + "</h1>");
-      $("#omdbDisplay").append('<h1 id="movieLabel">Plot</h1>');
-      $("#omdbDisplay").append('<h1 id="movieText">' + response.Plot + "</h1>");
-      $("#omdbDisplay").append('<h1 id="movieLabel">Actors</h1>');
-      $("#omdbDisplay").append('<h1 id ="movieText">' + response.Actors + "</h1>");
-      $("#omdbDisplay").append('<h1 id="movieLabel">Runtime</h1>');
-      $("#omdbDisplay").append('<h1 id ="movieText">' + response.Runtime + "</h1>");
-      $("#omdbDisplay").append('<h1 id="movieLabel">IMDB Rating</h1>');
-      $("#omdbDisplay").append('<h1 id ="movieText">' + response.imdbRating + "</h1>");
-      })
-    };
+
+  var displayOMDB = function(index) {
+    $("#movieTable").hide();
+    console.log(films[index]);
+    $("#omdbDisplay").append('<h1 id="movieLabel">Title</h1>');
+    $("#omdbDisplay").append('<h1 id="movieText">' + films[index].title + "</h1>");
+    $("#omdbDisplay").append('<img src="' + films[index].posterURL + '"' + 'alt="Poster" </img>')
+    $("#omdbDisplay").append('<h1 id="movieLabel">Released</h1>');
+    $("#omdbDisplay").append('<h1 id="movieText">' + films[index].releaseDate + "</h1>");
+    $("#omdbDisplay").append('<h1 id="movieLabel">Plot</h1>');
+    $("#omdbDisplay").append('<h1 id="movieText">' + films[index].plot + "</h1>");
+    $("#omdbDisplay").append('<h1 id="movieLabel">Actors</h1>');
+    $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].actors + "</h1>");
+    $("#omdbDisplay").append('<h1 id="movieLabel">Runtime</h1>');
+    $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].runtime + "</h1>");
+};
+
 
