@@ -159,3 +159,20 @@ body{
   line-height: 40px;
   width: 0px;
 } 
+
+th{
+  text-align: center;
+  font-size: 30px;
+  font-family: 'Poppins', sans-serif;
+}
+tr{
+  text-align: center;
+}
+
+td{
+  border-style: solid;
+  border-width: 3px;
+  border-color: black;
+  color: #e67e22;
+  font-family: 'Poppins', sans-serif;
+}
