@@ -188,26 +188,33 @@ function searchOMDB(film) {
       return response.json();
     })
     .then((response) => {
-      film.actors = response.Actors.split(', ');
-      film.country = response.Country;
-      film.directors = response.Director.split(', ');
-      film.genres = response.Genre.split(', ');
-      film.language = response.Language;
-      film.plot = response.Plot;
-      film.posterURL = response.Poster;
-      film.production = response.Production;
-      film.rated = response.Rated;
-      film.ratings = [];
-      response.Ratings.forEach((rating) => {
-        film.ratings.push({
-          source : rating.Source,
-          value  : rating.Value
+      film.isInOMDB = response.Response === 'True';
+
+      if (film.isInOMDB) {
+        film.actors = response.Actors.split(', ');
+        film.country = response.Country;
+        film.directors = response.Director.split(', ');
+        film.genres = response.Genre.split(', ');
+        film.language = response.Language;
+        film.plot = response.Plot;
+        film.posterURL = response.Poster;
+        film.production = response.Production;
+        film.rated = response.Rated;
+
+        film.ratings = [];
+        response.Ratings.forEach((rating) => {
+          film.ratings.push({
+            source : rating.Source,
+            value  : rating.Value
+          });
         });
-      });
-      film.releaseDate = response.Released;
-      film.runtime = response.Runtime;
-      film.type = response.Type;
-      film.writer = response.Writer;
+
+        film.releaseDate = response.Released;
+        film.runtime = response.Runtime;
+        film.type = response.Type;
+        film.writer = response.Writer;
+      }
+
       return film;
     });
 }
@@ -357,4 +364,5 @@ $.ajax(settings).done(function(response) {
 navSlide();
 loadFilmList().then((filmList) => {
   films = filmList;
+  //getYoutubeVideo(films[0]);
 });
