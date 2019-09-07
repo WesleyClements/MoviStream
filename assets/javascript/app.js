@@ -149,6 +149,14 @@ var movieArray = [
   { name: 'Wives Under Suspicion', year: 1938 }
 ];
 
+movieArray.sort(function (a,b){
+  var nameA = a.name.toUpperCase();
+  var nameB = b.name.toUpperCase();
+  // console.log(nameA);
+  console.log(nameB);
+});
+
+
 var downloadLink;
 
 const navSlide = () => {
@@ -365,4 +373,3 @@ var searchOMDB = function(movie, year) {
     })
   };
   //OMDB code ends here
-

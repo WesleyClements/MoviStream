@@ -13,6 +13,7 @@
 </head>
 
 <body>
+  <script src="/home/collin/Desktop/project_1/Project1/assets/javascript/app.js"></script>
   <nav>
     <div class="logo">
       <h4>Movies</h4>
@@ -28,7 +29,7 @@
         <a href="#">News</a>
       </li> -->
       <li>
-        <a href="#">Contact</a>
+        <a href="https://github.com/WesleyClements/Project1">Contact</a>
       </li>
     </ul>
     <div class="burger">
@@ -45,6 +46,9 @@
 
     </a>
   </div>
+
+  <div id="movies"></div>
+
 </body>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -54,7 +58,7 @@
 
 <script>
 
-  //loading in iFrame Player and API code
+  //loading in iFrame Player and API key
 
   var tag = document.createElement("script");
   tag.src = "https://www.youtube.com/iframe_api";
@@ -68,7 +72,7 @@
     ytPlayer = new YT.Player("player", {
       height: "300",
       width: "500",
-      videoId: "SWYqp7iY_Tc",
+      videoId: "8zskgdPmDkE",
       events: {
         "onReady": onPlayerReady,
         "onStateChange": onPlayerStateChange,
