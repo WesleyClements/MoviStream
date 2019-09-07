@@ -183,7 +183,7 @@ function refreshFilmList() {
   let params =
     'action=parse&page=List_of_films_in_the_public_domain_in_the_United_States&format=json';
 
-  fetch(apiEndpoint + '?' + params + '&origin=*')
+  return fetch(apiEndpoint + '?' + params + '&origin=*')
     .then((response) => {
       return response.json();
     })
@@ -325,7 +325,11 @@ var searchOMDB = function(movie, year) {
 
 $(document).ready(() => {
   navSlide();
-  refreshFilmList();
+  refreshFilmList().then(() =>{
+  if (top.location.pathname === '/movies.html'){
+    displayFilmList();
+    }
+});
 });
 
 // URL ripper code starts here
@@ -334,6 +338,8 @@ url = 'nfWlot6h_JM';
 
 var youtubeURLRip = 'https://getvideo.p.rapidapi.com/?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' + url;
 
+
+var getDownloadLink = function(youtubeURLRip){
 var settings = {
 	"async": true,
 	"crossDomain": true,
@@ -352,6 +358,7 @@ $.ajax(settings).done(function (response) {
     return;
   }
 });
+};
 //URL ripper code ends here
 
 //OMDB code starts here
@@ -366,3 +373,13 @@ var searchOMDB = function(movie, year) {
   };
   //OMDB code ends here
 
+  var displayFilmList = function() {
+    for (i=0; i< films.length; i++){
+      $("#movieTable").append('<tr><td>' + films[i].title + '</td><td>' + films[i].releaseYear + '</td><td>' + films[i].director + '</td></tr>')
+
+    }
+  };
+
+
+
+    
