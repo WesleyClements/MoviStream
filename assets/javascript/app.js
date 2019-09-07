@@ -359,11 +359,6 @@ $.ajax(settings).done(function(response) {
 });
 //URL ripper code ends here
 
-navSlide();
-loadFilmList().then((filmList) => {
-  films = filmList;
-  //getYoutubeVideo(films[0]);
-});
 
 $(document).ready(() => {
   navSlide();
