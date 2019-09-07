@@ -226,14 +226,12 @@ function getFilmList() {
   const sectionIndex = 11;
   const params = `action=parse&page=${wikiPageTitle}&section=${sectionIndex}&format=json&origin=*`;
 
+  console.log('fish');
   return fetch(apiEndpoint + '?' + params)
-    .then((response) => {
-      return response.json();
-    })
-    .then((jsonResponse) => {
-      return jsonResponse.parse.text['*'];
-    })
+    .then((response) => response.json())
+    .then((jsonResponse) => jsonResponse.parse.text['*'])
     .then((html) => {
+      console.log('fish');
       let films = [];
 
       let page = $(html);
@@ -282,6 +280,7 @@ function getFilmList() {
 
 function loadFilmList() {
   const currentTime = Date.now();
+  console.log('fish');
 
   let filmDatabase = JSON.parse(localStorage.getItem('filmDatabase'));
 
@@ -299,16 +298,19 @@ function loadFilmList() {
       needUpdate = millisecondsSinceLastUpdate > updateThresholdInMilliseconds;
     }
   }
+  console.log('fish');
   if (needUpdate) {
     let promises = [];
     return getFilmList()
       .then((films) => {
+        console.log('fish');
         films.forEach((film) => {
           promises.push(searchOMDB(film));
         });
       })
       .then(() => Promise.all(promises))
       .then((films) => {
+        console.log('fish');
         filmDatabase = {
           lastUpdateTime : currentTime,
           films          : films
@@ -317,9 +319,7 @@ function loadFilmList() {
         return films;
       });
   }
-  return new Promise((resolve) => {
-    return filmDatabase.films;
-  });
+  return new Promise((resolve) => resolve(filmDatabase.films));
 }
 
 function getYoutubeVideo(film) {
@@ -327,6 +327,7 @@ function getYoutubeVideo(film) {
   let apiKey = 'AIzaSyCSz_oYNA4L3hphcNmafYqYJ7_tyBJTsh0';
   let query = `${film.title} ${film.releaseYear}`;
   let params = `q=${query}&part=snippet&type=video&videoLicense=creativeCommon&videoEmbeddable=true&key=${apiKey}`;
+  console.log('yah');
   return fetch(apiEndpoint + '?' + params)
     .then((response) => response.json())
     .then((jsonResponse) => {
@@ -364,5 +365,6 @@ $.ajax(settings).done(function(response) {
 navSlide();
 loadFilmList().then((filmList) => {
   films = filmList;
-  //getYoutubeVideo(films[0]);
+  console.log('fish');
+  getYoutubeVideo(films[0]);
 });
