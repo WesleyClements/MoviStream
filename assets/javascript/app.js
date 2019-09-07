@@ -186,109 +186,154 @@ const navSlide = () => {
 
 let films = [];
 
-function refreshFilmList() {
-  let apiEndpoint = 'https://en.wikipedia.org/w/api.php';
-  let params =
-    'action=parse&page=List_of_films_in_the_public_domain_in_the_United_States&format=json';
-
-  fetch(apiEndpoint + '?' + params + '&origin=*')
-    .then((response) => {
+//OMDB code starts here
+function searchOMDB(film) {
+  const apiEndpoint = 'https://www.omdbapi.com';
+  const apiKey = '89c83bfd';
+  const params = `apikey=${apiKey}&t=${film.title}&y=${film.releaseYear}&type=movie&plot=short`;
+  return fetch(apiEndpoint + '?' + params)
+    .then(function(response) {
       return response.json();
     })
     .then((response) => {
-      return response.parse;
-    })
+      film.actors = response.Actors.split(', ');
+      film.country = response.Country;
+      film.directors = response.Director.split(', ');
+      film.genres = response.Genre.split(', ');
+      film.language = response.Language;
+      film.plot = response.Plot;
+      film.posterURL = response.Poster;
+      film.production = response.Production;
+      film.rated = response.Rated;
+      film.ratings = [];
+      response.Ratings.forEach((rating) => {
+        film.ratings.push({
+          source : rating.Source,
+          value  : rating.Value
+        });
+      });
+      film.releaseDate = response.Released;
+      film.runtime = response.Runtime;
+      film.type = response.Type;
+      film.writer = response.Writer;
+      return film;
+    });
+}
+//OMDB code ends here
+
+function getFilmList() {
+  const apiEndpoint = 'https://en.wikipedia.org/w/api.php';
+  const wikiPageTitle = 'List_of_films_in_the_public_domain_in_the_United_States';
+  const sectionIndex = 11;
+  const params = `action=parse&page=${wikiPageTitle}&section=${sectionIndex}&format=json&origin=*`;
+
+  return fetch(apiEndpoint + '?' + params)
     .then((response) => {
-      return response.text;
+      return response.json();
     })
-    .then((response) => {
-      return response['*'];
+    .then((jsonResponse) => {
+      return jsonResponse.parse.text['*'];
     })
-    .then((response) => {
-      let page = $(response);
+    .then((html) => {
+      let films = [];
+
+      let page = $(html);
       let table = page.children('.wikitable');
       let tbody = table.children('tbody');
-      let rows = tbody.children('tr');
 
-      let headers = [];
+      $.each(tbody.children('tr'), (rowIndex, tr) => {
+        if (rowIndex == 0) return;
 
-      $.each(rows, (rowIndex, row) => {
-        if (!row) return;
+        if (!tr) return;
 
-        let tr = $(row);
+        let filmIndex = rowIndex - 1;
+        let film = { index: filmIndex };
 
-        if (rowIndex == 0) {
-          let tableHeaderArray = tr.children('th');
+        // Parse tr
+        $.each($(tr).children('td'), (dataIndex, td) => {
+          if (!td) return;
+          let tableData = $(td);
 
-          $.each(tableHeaderArray, (thIndex, th) => {
-            if (!th) return;
-            let tableHeader = $(th);
-            headers.push(tableHeader.text());
-          });
-        }
-        else {
-          let film = { index: rowIndex - 1 };
+          if (!tableData.html()) return;
 
-          let tableDataArray = tr.children('td');
-
-          $.each(tableDataArray, (dataIndex, td) => {
-            if (!td) return;
-            let tableData = $(td);
-
-            let html = tableData.html();
-            if (!html) return;
-
-            switch (dataIndex) {
-              case 0:
-                {
-                  // film title
-                  film.title = tableData.text();
-                }
-                break;
-              case 1:
-                {
-                  // release year
-                  film.releaseYear = tableData.text();
-                }
-                break;
-              case 2:
-                {
-                  // director
-                  film.director = tableData.text();
-                }
-                break;
-              case 3:
-                {
-                  // studio / distributor
-                  film.distributor = tableData.text();
-                }
-                break;
-              case 4:
-                {
-                  // year film entered public domain
-                  film.yearEnteredPD = tableData.text();
-                }
-                break;
-              case 5:
-                {
-                  // reason for entering public domain
-                  film.reasonForEnteringPD = tableData.text();
-                }
-                break;
-              case 6:
-                {
-                  // note
-                  film.note = tableData.text();
-                }
-                break;
-            }
-          });
-          films.push(film);
-        }
+          switch (dataIndex) {
+            case 0:
+              // film title
+              film.title = tableData.text();
+              break;
+            case 1:
+              // release year
+              film.releaseYear = tableData.text();
+              break;
+            case 4:
+              // year film entered public domain
+              film.yearEnteredPD = tableData.text();
+              break;
+            case 5:
+              // reason for entering public domain
+              film.reasonForEnteringPD = tableData.text();
+              break;
+          }
+        });
+        films.push(film);
       });
+      return films;
     });
 }
 
+function loadFilmList() {
+  const currentTime = Date.now();
+
+  let filmDatabase = JSON.parse(localStorage.getItem('filmDatabase'));
+
+  let needUpdate = false;
+
+  if (!filmDatabase) needUpdate = true;
+  else {
+    const lastUpdateTime = filmDatabase.lastUpdateTime;
+    if (!lastUpdateTime) needUpdate = true;
+    else {
+      const updateThresholdInMilliseconds = 1000 * 60 * 60 * 24 * 7;
+
+      let millisecondsSinceLastUpdate = currentTime - lastUpdateTime;
+
+      needUpdate = millisecondsSinceLastUpdate > updateThresholdInMilliseconds;
+    }
+  }
+  if (needUpdate) {
+    let promises = [];
+    return getFilmList()
+      .then((films) => {
+        films.forEach((film) => {
+          promises.push(searchOMDB(film));
+        });
+      })
+      .then(() => Promise.all(promises))
+      .then((films) => {
+        filmDatabase = {
+          lastUpdateTime : currentTime,
+          films          : films
+        };
+        localStorage.setItem('filmDatabase', JSON.stringify(filmDatabase));
+        return films;
+      });
+  }
+  return new Promise((resolve) => {
+    return filmDatabase.films;
+  });
+}
+
+function getYoutubeVideo(film) {
+  let apiEndpoint = 'https://www.googleapis.com/youtube/v3/search';
+  let apiKey = 'AIzaSyCSz_oYNA4L3hphcNmafYqYJ7_tyBJTsh0';
+  let query = `${film.title} ${film.releaseYear}`;
+  let params = `q=${query}&part=snippet&type=video&videoLicense=creativeCommon&videoEmbeddable=true&key=${apiKey}`;
+  return fetch(apiEndpoint + '?' + params)
+    .then((response) => response.json())
+    .then((jsonResponse) => {
+      console.log(jsonResponse);
+    });
+}
 // URL ripper code starts here
 //URL will come from youtube api and not be hardcoded
 url = 'nfWlot6h_JM';
@@ -317,59 +362,7 @@ $.ajax(settings).done(function(response) {
 });
 //URL ripper code ends here
 
-//OMDB code starts here
-var searchOMDB = function(movie, year) {
-  var queryURL =
-    'https://www.omdbapi.com/?apikey=89c83bfd&t=' + movie + '&type=movie&plot=short&y=' + year;
-  $.ajax({
-    url    : queryURL,
-    method : 'GET'
-  }).then(function(response) {
-    console.log(response);
-  });
-};
-//OMDB code ends here
-
-
-$(document).ready(() => {
-  navSlide();
-  refreshFilmList();
+navSlide();
+loadFilmList().then((filmList) => {
+  films = filmList;
 });
-
-// URL ripper code starts here
-//URL will come from youtube api and not be hardcoded
-url = 'nfWlot6h_JM';
-
-var youtubeURLRip = 'https://getvideo.p.rapidapi.com/?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' + url;
-
-var settings = {
-	"async": true,
-	"crossDomain": true,
-	"url": youtubeURLRip,
-	"method": "GET",
-	"headers": {
-		"x-rapidapi-host": "getvideo.p.rapidapi.com",
-		"x-rapidapi-key": "a4aed55e02mshaa114b38bc3f970p11239fjsn6ea45666c466"
-	}
-}
-// the API here sometimes fails. if it fails, don't show a download link. Will add JQuery later
-$.ajax(settings).done(function (response) {
-	if (response.message === "Successfully received info."){
-    downloadLink = response.streams[0].url;
-  } else {
-    return;
-  }
-});
-//URL ripper code ends here
-
-//OMDB code starts here
-var searchOMDB = function(movie, year) {
-  var queryURL = "https://www.omdbapi.com/?apikey=89c83bfd&t=" + movie + '&type=movie&plot=short&y=' + year;
-  $.ajax({
-    url: queryURL,
-    method: "GET"
-  }).then(function(response) {
-    console.log(response);
-    })
-  };
-  //OMDB code ends here
