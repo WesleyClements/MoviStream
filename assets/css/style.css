@@ -160,6 +160,40 @@ body{
   width: 0px;
 } 
 
+<<<<<<< HEAD
 #player{
   margin: 30px;
+=======
+th{
+  text-align: center;
+  font-size: 30px;
+  font-family: 'Poppins', sans-serif;
+}
+tr{
+  text-align: center;
+}
+
+td{
+  border-style: solid;
+  border-width: 3px;
+  border-color: black;
+  color: #e67e22;
+  font-family: 'Poppins', sans-serif;
+}
+
+#omdbDisplay{
+  text-align: center;
+}
+
+#movieLabel{
+  color: #e67e22;
+  font-family: 'Poppins', sans-serif;
+  font-size: 30px;
+}
+
+#movieText{
+  color:#cac7c7 ;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+>>>>>>> a113277be90e84e7b27cc47220acdfdadc04796f
 }
