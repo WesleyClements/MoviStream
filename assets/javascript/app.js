@@ -409,7 +409,61 @@ $.ajax(settings).done(function(response) {
 });
 //URL ripper code ends here
 
+var displayFilmList = function() {
+  let movieTable = $("#movieTable");
+  films.forEach((film, index) => {
+    let tr = $('<tr>');
+    tr.addClass('movieLink');
+    tr.data('index', index);
+    
+    let title = $('<td>');
+    title.text(film.title);
+    
+    let releaseYear = $('<td>');
+    title.text(film.releaseYear);
+    
+    let directors = $('<td>');
+    title.text(film.directors.join(', '));
+    
+    tr.append(title, releaseYear, directors);
+    
+    movieTable.append(tr);
+  });
+};
+
+$('#movieTable').on('click', '.movieLink', function() {
+  let index = $(this).data('index');
+  let currentMovieName = films[index].title;
+  let currentMovieYear = films[index].releaseYear;
+  displayIndividualFilm(currentMovieName, currentMovieYear, index);
+});
+  
+var displayIndividualFilm = function(movie, year, index) {
+  displayOMDB(index);
+};
+  
+var displayOMDB = function(index) {
+  $("#movieTable").hide();
+  console.log(films[index]);
+  $("#omdbDisplay").append('<h1 id="movieLabel">Title</h1>');
+  $("#omdbDisplay").append('<h1 id="movieText">' + films[index].title + "</h1>");
+  $("#omdbDisplay").append('<img src="' + films[index].posterURL + '"' + 'alt="Poster" </img>')
+  $("#omdbDisplay").append('<h1 id="movieLabel">Released</h1>');
+  $("#omdbDisplay").append('<h1 id="movieText">' + films[index].releaseDate + "</h1>");
+  $("#omdbDisplay").append('<h1 id="movieLabel">Plot</h1>');
+  $("#omdbDisplay").append('<h1 id="movieText">' + films[index].plot + "</h1>");
+  $("#omdbDisplay").append('<h1 id="movieLabel">Actors</h1>');
+  $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].actors + "</h1>");
+  $("#omdbDisplay").append('<h1 id="movieLabel">Runtime</h1>');
+  $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].runtime + "</h1>");
+};
+
+
 navSlide();
 loadFilmList().then((filmList) => {
   films = filmList;
+  console.log(films)
+  if (top.location.pathname === '/movies.html') {
+    displayFilmList();
+  }
 });

@@ -176,3 +176,19 @@ td{
   color: #e67e22;
   font-family: 'Poppins', sans-serif;
 }
+
+#omdbDisplay{
+  text-align: center;
+}
+
+#movieLabel{
+  color: #e67e22;
+  font-family: 'Poppins', sans-serif;
+  font-size: 30px;
+}
+
+#movieText{
+  color:#cac7c7 ;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+}
