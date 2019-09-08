@@ -321,13 +321,13 @@ function loadFilmList() {
   return new Promise((resolve) => resolve(filmDatabase.films));
 }
 
-function getYoutubeVideos(film) {
+function getYoutubeVideos(film, queryGenerator = (film) => `${film.title} ${film.releaseYear}`) {
   const searchAPIEndpoint = 'https://www.googleapis.com/youtube/v3/search';
   const videoAPIEndpoint = 'https://www.googleapis.com/youtube/v3/videos';
 
   const apiKey = 'AIzaSyCSz_oYNA4L3hphcNmafYqYJ7_tyBJTsh0';
 
-  const query = `${film.title} ${film.releaseYear}`;
+  const query = queryGenerator(film);
 
   const params = `part=snippet&q=${query}&type=video&videoLicense=creativeCommon&videoEmbeddable=true&key=${apiKey}`;
 
