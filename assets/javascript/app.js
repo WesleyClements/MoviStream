@@ -182,7 +182,9 @@ let films = [];
 function searchOMDB(film) {
   const apiEndpoint = 'https://www.omdbapi.com';
   const apiKey = '89c83bfd';
+
   const params = `apikey=${apiKey}&t=${film.title}&y=${film.releaseYear}&type=movie&plot=short`;
+
   return fetch(apiEndpoint + '?' + params)
     .then(function(response) {
       return response.json();
@@ -210,7 +212,11 @@ function searchOMDB(film) {
         });
 
         film.releaseDate = response.Released;
-        film.runtime = response.Runtime;
+
+        let numbers = response.Runtime.match(/(\d+)/g);
+        if (numbers) film.duration = numbers[0];
+        else film.duration = 0;
+
         film.type = response.Type;
         film.writer = response.Writer;
       }
@@ -222,16 +228,16 @@ function searchOMDB(film) {
 
 function getFilmList() {
   const apiEndpoint = 'https://en.wikipedia.org/w/api.php';
+
   const wikiPageTitle = 'List_of_films_in_the_public_domain_in_the_United_States';
   const sectionIndex = 11;
+
   const params = `action=parse&page=${wikiPageTitle}&section=${sectionIndex}&format=json&origin=*`;
 
-  console.log('fish');
   return fetch(apiEndpoint + '?' + params)
     .then((response) => response.json())
     .then((jsonResponse) => jsonResponse.parse.text['*'])
     .then((html) => {
-      console.log('fish');
       let films = [];
 
       let page = $(html);
@@ -280,7 +286,6 @@ function getFilmList() {
 
 function loadFilmList() {
   const currentTime = Date.now();
-  console.log('fish');
 
   let filmDatabase = JSON.parse(localStorage.getItem('filmDatabase'));
 
@@ -298,19 +303,13 @@ function loadFilmList() {
       needUpdate = millisecondsSinceLastUpdate > updateThresholdInMilliseconds;
     }
   }
-  console.log('fish');
   if (needUpdate) {
-    let promises = [];
     return getFilmList()
       .then((films) => {
-        console.log('fish');
-        films.forEach((film) => {
-          promises.push(searchOMDB(film));
-        });
+        let searches = films.map((film) => searchOMDB(film));
+        return Promise.all(searches);
       })
-      .then(() => Promise.all(promises))
       .then((films) => {
-        console.log('fish');
         filmDatabase = {
           lastUpdateTime : currentTime,
           films          : films
@@ -322,16 +321,64 @@ function loadFilmList() {
   return new Promise((resolve) => resolve(filmDatabase.films));
 }
 
-function getYoutubeVideo(film) {
-  let apiEndpoint = 'https://www.googleapis.com/youtube/v3/search';
-  let apiKey = 'AIzaSyCSz_oYNA4L3hphcNmafYqYJ7_tyBJTsh0';
-  let query = `${film.title} ${film.releaseYear}`;
-  let params = `q=${query}&part=snippet&type=video&videoLicense=creativeCommon&videoEmbeddable=true&key=${apiKey}`;
-  console.log('yah');
-  return fetch(apiEndpoint + '?' + params)
+function getYoutubeVideos(film) {
+  const searchAPIEndpoint = 'https://www.googleapis.com/youtube/v3/search';
+  const videoAPIEndpoint = 'https://www.googleapis.com/youtube/v3/videos';
+
+  const apiKey = 'AIzaSyCSz_oYNA4L3hphcNmafYqYJ7_tyBJTsh0';
+
+  const query = `${film.title} ${film.releaseYear}`;
+
+  const params = `part=snippet&q=${query}&type=video&videoLicense=creativeCommon&videoEmbeddable=true&key=${apiKey}`;
+
+  return fetch(searchAPIEndpoint + '?' + params)
     .then((response) => response.json())
-    .then((jsonResponse) => {
-      console.log(jsonResponse);
+    .then((jsonResponse) => jsonResponse.items)
+    .then((items) => {
+      let videoIds = items.map((item) => item.id.videoId);
+
+      const params = `id=${videoIds.join()}&part=contentDetails&key=${apiKey}`;
+
+      return fetch(videoAPIEndpoint + '?' + params)
+        .then((response) => response.json())
+        .then((jsonResponse) => jsonResponse.items)
+        .then((items) => {
+          let videos = [];
+          items.forEach((item) => {
+            let details = item.contentDetails;
+
+            let hours = details.duration.match(/(\d+H)/g);
+            let minutes = details.duration.match(/(\d+M)/g);
+            let seconds = details.duration.match(/(\d+S)/g);
+
+            let duration = 0;
+            if (hours) {
+              let hour = hours[0];
+              hour = hour.slice(0, -1);
+              hour = parseInt(hour);
+              duration += hour * 60;
+            }
+            if (minutes) {
+              let minute = minutes[0];
+              minute = minute.slice(0, -1);
+              minute = parseInt(minute);
+              duration += minute;
+            }
+            if (seconds) {
+              let second = seconds[0];
+              second = second.slice(0, -1);
+              second = parseInt(second);
+              duration += second / 60;
+            }
+
+            videos.push({
+              id        : item.id,
+              duration  : duration,
+              captioned : details.caption
+            });
+          });
+          return videos;
+        });
     });
 }
 // URL ripper code starts here
@@ -365,6 +412,4 @@ $.ajax(settings).done(function(response) {
 navSlide();
 loadFilmList().then((filmList) => {
   films = filmList;
-  console.log('fish');
-  getYoutubeVideo(films[0]);
 });
