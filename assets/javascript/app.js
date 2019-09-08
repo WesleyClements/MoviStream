@@ -331,34 +331,6 @@ function getYoutubeVideo(film) {
       console.log(jsonResponse);
     });
 }
-// URL ripper code starts here
-//URL will come from youtube api and not be hardcoded
-url = 'nfWlot6h_JM';
-
-var youtubeURLRip =
-  'https://getvideo.p.rapidapi.com/?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' + url;
-
-var settings = {
-  async       : true,
-  crossDomain : true,
-  url         : youtubeURLRip,
-  method      : 'GET',
-  headers     : {
-    'x-rapidapi-host' : 'getvideo.p.rapidapi.com',
-    'x-rapidapi-key'  : 'a4aed55e02mshaa114b38bc3f970p11239fjsn6ea45666c466'
-  }
-};
-// the API here sometimes fails. if it fails, don't show a download link. Will add JQuery later
-$.ajax(settings).done(function(response) {
-  if (response.message === 'Successfully received info.') {
-    downloadLink = response.streams[0].url;
-  }
-  else {
-    return;
-  }
-});
-//URL ripper code ends here
-
 
 $(document).ready(() => {
   navSlide();
@@ -366,17 +338,45 @@ $(document).ready(() => {
     films = filmList;
     //getYoutubeVideo(films[0]);
     console.log(films);
-    if (top.location.pathname === '/movies.html'){
-      displayFilmList();
-      }
   });
 
 
 });
+
+//URL ripper code starts here
+var getDownloadURL = function(youtubeID) {
+  var youtubeURLRip =
+    'https://getvideo.p.rapidapi.com/?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' + youtubeID;
+  
+  var settings = {
+    async       : true,
+    crossDomain : true,
+    url         : youtubeURLRip,
+    method      : 'GET',
+    headers     : {
+      'x-rapidapi-host' : 'getvideo.p.rapidapi.com',
+      'x-rapidapi-key'  : 'a4aed55e02mshaa114b38bc3f970p11239fjsn6ea45666c466'
+    }
+  };
+
+  $.ajax(settings).done(function(response) {
+    if (response.message === 'Successfully received info.') {
+      downloadLink = response.streams[0].url;
+    }
+    else {
+      return;
+    }
+  });
+};
 //URL ripper code ends here
 
 
   var displayFilmList = function() {
+    $("#movieTable").empty();
+    $("#omdbDisplay").empty();
+    $(".search-box").hide();
+    $("#movieTable").show();
+    $("#movieTable").append('<tr><th>Title</th><th>Release Year</th><th>Director</th></tr>');
     for (i=0; i< films.length; i++){
       $("#movieTable").append('<tr class="movieLink" id="' + [i] + '"><td id="' + films[i].title + '">' + films[i].title + '</td><td class="releaseYear" id="' + films[i].releaseYear + '">' + films[i].releaseYear + '</td><td>' + films[i].directors + '</td></tr>');
     }
@@ -397,7 +397,7 @@ $(document).ready(() => {
 
   var displayOMDB = function(index) {
     $("#movieTable").hide();
-    console.log(films[index]);
+    $(".search-box").hide();;
     $("#omdbDisplay").append('<h1 id="movieLabel">Title</h1>');
     $("#omdbDisplay").append('<h1 id="movieText">' + films[index].title + "</h1>");
     $("#omdbDisplay").append('<img src="' + films[index].posterURL + '"' + 'alt="Poster" </img>')
@@ -412,3 +412,38 @@ $(document).ready(() => {
 };
 
 
+$(".search-btn").click(function() {
+  $("#movieTable").show();
+  $("#movieTable").empty();
+  var searchText = $(".search-txt").val().trim().toLowerCase();
+  var total = 0;
+  $("#movieTable").append('<tr><th>Title</th><th>Release Year</th><th>Director</th></tr>');
+  $(".search-txt").val("");
+  if (searchText !== ""){
+    for (i=0; i< films.length; i++){
+      if (films[i].title.toLowerCase().includes(searchText)){
+        $("#movieTable").append('<tr class="movieLink" id="' + [i] + '"><td id="' + films[i].title + '">' + films[i].title + '</td><td class="releaseYear" id="' + films[i].releaseYear + '">' + films[i].releaseYear + '</td><td>' + films[i].directors + '</td></tr>');
+        total++;
+      } 
+    }
+    if (total === 0){
+      $("#movieTable").empty();
+      $(".search-results").show();
+      $(".search-results").append('<div id="noResults"><h1>No results for ' + searchText +'</h1></div>').fadeOut(5000, function() { $("#noResults").remove(); });
+    }
+  } else {
+    return;
+  }
+});
+
+
+$(".allMovieLink").click(function() {
+  $(".search-box").hide();
+  displayFilmList();
+});
+
+$(".homeLink").click(function() {
+  $(".search-box").show();
+  $("#omdbDisplay").empty();
+  $("#movieTable").empty();
+});
