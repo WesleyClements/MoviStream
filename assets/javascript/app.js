@@ -364,8 +364,6 @@ function displayFilmPage(film) {
   $('#omdbDisplay').append('<h1 id ="movieText">' + films.runtime + '</h1>');
 }
 
-function displaySearchResults() {}
-
 $('.search-box').on('submit', (event) => {
   event.preventDefault();
 
@@ -432,6 +430,8 @@ $('.allMovieLink').on('click', (event) => {
 
 $('.contactLink').on('click', (event) => {
   if (pageState === 'contact') return;
+
+  pageState = 'contact';
 });
 
 $('#movieTable').on('click', '.movieLink', function() {
