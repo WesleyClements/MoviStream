@@ -1,15 +1,15 @@
-*{
+* {
   margin: 0px;
-  padding:0px;
+  padding: 0px;
   box-sizing: border-box;
 }
-body{
+body {
   margin: 0;
   padding: 0;
   background: #2c3e50;
 }
-nav{
-  display : flex;
+nav {
+  display: flex;
   justify-content: space-around;
   align-items: center;
   min-height: 8vh;
@@ -17,36 +17,38 @@ nav{
   font-family: 'Poppins', sans-serif;
 }
 
-.logo{
+.logo {
   color: #e67e22;
   text-transform: uppercase;
   letter-spacing: 5px;
   font-size: 20px;
 }
 
-.nav-links{
+.nav-links {
   display: flex;
   justify-content: space-around;
   width: 30%;
 }
 
-.nav-links li{
+.nav-links li {
   list-style: none;
 }
-.nav-links a{
+.nav-links a,
+#navLink {
   color: #e67e22;
   text-decoration: none;
   letter-spacing: 3px;
   font-weight: bold;
   font-size: 14px;
+  cursor: pointer;
 }
 
-.burger{
+.burger {
   display: none;
   cursor: pointer;
 }
 
-.burger div{
+.burger div {
   width: 25px;
   height: 3px;
   background-color: #e67e22;
@@ -54,68 +56,68 @@ nav{
   transition: all 0.3s ease;
 }
 
-@media screen and (max-width:1024px){
-  .nav-links{
+@media screen and (max-width: 1024px) {
+  .nav-links {
     width: 60%;
   }
 }
 
-@media screen and (max-width:768px){
-   body{
-      overflow-x: hidden;
-   }
-  .nav-links{
-     position: absolute;
-     right: 0px;
-     height: 92vh;
-     top: 8vh;
-     background-color: #1d3246;
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     width: 50%;
-     transform: translateX(100%);
-     transition: transform 0.5s ease-in;
+@media screen and (max-width: 768px) {
+  body {
+    overflow-x: hidden;
   }
-  .nav-links li{
+  .nav-links {
+    position: absolute;
+    right: 0px;
+    height: 92vh;
+    top: 8vh;
+    background-color: #1d3246;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    transform: translateX(100%);
+    transition: transform 0.5s ease-in;
+  }
+  .nav-links li {
     opacity: 0;
   }
-  .burger{
-   display: block;
+  .burger {
+    display: block;
   }
 }
 
-.nav-active{
+.nav-active {
   transform: translateX(0%);
 }
 
-@keyframes navLinkFade{
-  from{
+@keyframes navLinkFade {
+  from {
     opacity: 0;
     transform: translateX(50px);
   }
-  to{
+  to {
     opacity: 1;
     transform: translateX(0px);
   }
 }
 
-.toggle .line1{
+.toggle .line1 {
   transform: rotate(-90deg) translate(-5px, -6px);
 }
-.toggle .line2{
+.toggle .line2 {
   opacity: 0;
 }
-.toggle .line3{
+.toggle .line3 {
   transform: rotate(-90deg) translate(-5px, -6px);
 }
 
-body{
+body {
   margin: 0;
   padding: 0;
   background: #2c3e50;
 }
-.search-box{
+.search-box {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -125,20 +127,21 @@ body{
   border-radius: 40px;
   padding: 10px;
 }
-.search-box:hover > .search-txt{
+.search-box:hover > .search-txt {
   width: 240px;
   padding: 0 6px;
 }
 
-.search-box:hover > .search-btn{
+.search-box:hover > .search-btn {
   background: #e67e22;
   color: #1d3246;
-} 
-.search-btn{
+}
+.search-btn {
   color: #e67e22;
   float: right;
   width: 40px;
   height: 40px;
+  border: 0px;
   border-radius: 50%;
   background: #1d3246;
   display: flex;
@@ -146,7 +149,7 @@ body{
   align-items: center;
 }
 
-.search-txt{
+.search-txt {
   border: none;
   background: none;
   outline: none;
@@ -158,18 +161,18 @@ body{
   transition: 0.4s;
   line-height: 40px;
   width: 0px;
-} 
+}
 
-th{
+th {
   text-align: center;
   font-size: 30px;
   font-family: 'Poppins', sans-serif;
 }
-tr{
+tr {
   text-align: center;
 }
 
-td{
+td {
   border-style: solid;
   border-width: 3px;
   border-color: black;
@@ -177,18 +180,47 @@ td{
   font-family: 'Poppins', sans-serif;
 }
 
-#omdbDisplay{
+#omdbDisplay {
   text-align: center;
 }
 
-#movieLabel{
+#movieLabel {
+  color: #e67e22;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+}
+
+#movieText {
+  color: #cac7c7;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+}
+
+#noResults {
   color: #e67e22;
   font-family: 'Poppins', sans-serif;
   font-size: 30px;
+  text-align: center;
 }
 
-#movieText{
-  color:#cac7c7 ;
+#ytDisplay {
+  text-align: center;
+}
+#ytplayer {
+  text-align: center;
+  display: inline-block;
+  padding: 10px;
+}
+
+#moviePoster {
+  height: 200px;
+}
+#ytDownload {
+  text-align: center;
+}
+#downloadLink {
+  display: inline-block;
+  color: #e67e22;
   font-family: 'Poppins', sans-serif;
   font-size: 20px;
 }

@@ -10,26 +10,24 @@
   <link rel="stylesheet" href="./assets/css/reset.css">
   <link rel="stylesheet" href="./assets/css/style.css">
   
-  <title>Project 1</title>
+  <title>MoviStream</title>
 </head>
 
 <body>
   <nav>
     <div class="logo">
-      <h4>Movies</h4>
+        <img src="./assets/images/sitelogo.png" width="60px" length="60px">
+      <h4>MoviStream</h4>
     </div>
     <ul class="nav-links">
       <li>
-        <a href="./index.html">Home</a>
+        <a class="homeLink navLink">Home</a>
       </li>
       <li>
-        <a href="#">Genres</a>
+        <a class="allMovieLink navLink">All Movies</a>
       </li>
       <li>
-        <a href="./movies.html">All Movies</a>
-      </li>
-      <li>
-        <a href="#">Contact</a>
+        <a class="contactLink navLink">Contact</a>
       </li>
     </ul>
     <div class="burger">
@@ -39,13 +37,18 @@
     </div>
   </nav>
 
-  <div class="search-box">
+  <form class="search-box">
     <input class="search-txt" type="text" name="" placeholder="Search For Movies">
-    <a class="search-btn" href="#">
+    <button class="search-btn" type="submit">
       <i class="fas fa-search"></i>
-
-    </a>
-  </div>
+    </button>
+  </form>
+  <div class="search-results"></div>
+  <table id="movieTable" style="width:100%"></table>
+  <div id="omdbDisplay"></div>
+  <div id="ytDisplay"></div>
+  <div id="ytDownload"></div>
+  
 </body>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
