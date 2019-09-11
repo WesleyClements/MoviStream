@@ -182,7 +182,9 @@ let films = [];
 function searchOMDB(film) {
   const apiEndpoint = 'https://www.omdbapi.com';
   const apiKey = '89c83bfd';
+
   const params = `apikey=${apiKey}&t=${film.title}&y=${film.releaseYear}&type=movie&plot=short`;
+
   return fetch(apiEndpoint + '?' + params)
     .then(function(response) {
       return response.json();
@@ -210,7 +212,11 @@ function searchOMDB(film) {
         });
 
         film.releaseDate = response.Released;
-        film.runtime = response.Runtime;
+
+        let numbers = response.Runtime.match(/(\d+)/g);
+        if (numbers) film.duration = numbers[0];
+        else film.duration = 0;
+
         film.type = response.Type;
         film.writer = response.Writer;
       }
@@ -222,17 +228,15 @@ function searchOMDB(film) {
 
 function getFilmList() {
   const apiEndpoint = 'https://en.wikipedia.org/w/api.php';
+
   const wikiPageTitle = 'List_of_films_in_the_public_domain_in_the_United_States';
   const sectionIndex = 11;
+
   const params = `action=parse&page=${wikiPageTitle}&section=${sectionIndex}&format=json&origin=*`;
 
   return fetch(apiEndpoint + '?' + params)
-    .then((response) => {
-      return response.json();
-    })
-    .then((jsonResponse) => {
-      return jsonResponse.parse.text['*'];
-    })
+    .then((response) => response.json())
+    .then((jsonResponse) => jsonResponse.parse.text['*'])
     .then((html) => {
       let films = [];
 
@@ -300,14 +304,11 @@ function loadFilmList() {
     }
   }
   if (needUpdate) {
-    let promises = [];
     return getFilmList()
       .then((films) => {
-        films.forEach((film) => {
-          promises.push(searchOMDB(film));
-        });
+        let searches = films.map((film) => searchOMDB(film));
+        return Promise.all(searches);
       })
-      .then(() => Promise.all(promises))
       .then((films) => {
         filmDatabase = {
           lastUpdateTime : currentTime,
@@ -320,15 +321,64 @@ function loadFilmList() {
   return new Promise((resolve) => resolve(filmDatabase.films));
 }
 
-function getYoutubeVideo(film) {
-  let apiEndpoint = 'https://www.googleapis.com/youtube/v3/search';
-  let apiKey = 'AIzaSyCSz_oYNA4L3hphcNmafYqYJ7_tyBJTsh0';
-  let query = `${film.title} ${film.releaseYear}`;
-  let params = `q=${query}&part=snippet&type=video&videoLicense=creativeCommon&videoEmbeddable=true&key=${apiKey}`;
-  return fetch(apiEndpoint + '?' + params)
+function getYoutubeVideos(film, queryGenerator = (film) => `${film.title} ${film.releaseYear}`) {
+  const searchAPIEndpoint = 'https://www.googleapis.com/youtube/v3/search';
+  const videoAPIEndpoint = 'https://www.googleapis.com/youtube/v3/videos';
+
+  const apiKey = 'AIzaSyCSz_oYNA4L3hphcNmafYqYJ7_tyBJTsh0';
+
+  const query = queryGenerator(film);
+
+  const params = `part=snippet&q=${query}&type=video&videoLicense=creativeCommon&videoEmbeddable=true&key=${apiKey}`;
+
+  return fetch(searchAPIEndpoint + '?' + params)
     .then((response) => response.json())
-    .then((jsonResponse) => {
-      console.log(jsonResponse);
+    .then((jsonResponse) => jsonResponse.items)
+    .then((items) => {
+      let videoIds = items.map((item) => item.id.videoId);
+
+      const params = `id=${videoIds.join()}&part=contentDetails&key=${apiKey}`;
+
+      return fetch(videoAPIEndpoint + '?' + params)
+        .then((response) => response.json())
+        .then((jsonResponse) => jsonResponse.items)
+        .then((items) => {
+          let videos = [];
+          items.forEach((item) => {
+            let details = item.contentDetails;
+
+            let hours = details.duration.match(/(\d+H)/g);
+            let minutes = details.duration.match(/(\d+M)/g);
+            let seconds = details.duration.match(/(\d+S)/g);
+
+            let duration = 0;
+            if (hours) {
+              let hour = hours[0];
+              hour = hour.slice(0, -1);
+              hour = parseInt(hour);
+              duration += hour * 60;
+            }
+            if (minutes) {
+              let minute = minutes[0];
+              minute = minute.slice(0, -1);
+              minute = parseInt(minute);
+              duration += minute;
+            }
+            if (seconds) {
+              let second = seconds[0];
+              second = second.slice(0, -1);
+              second = parseInt(second);
+              duration += second / 60;
+            }
+
+            videos.push({
+              id        : item.id,
+              duration  : duration,
+              captioned : details.caption
+            });
+          });
+          return videos;
+        });
     });
 }
 // URL ripper code starts here
@@ -359,56 +409,61 @@ $.ajax(settings).done(function(response) {
 });
 //URL ripper code ends here
 
-
-$(document).ready(() => {
-  navSlide();
-  loadFilmList().then((filmList) => {
-    films = filmList;
-    //getYoutubeVideo(films[0]);
-    console.log(films);
-    if (top.location.pathname === '/movies.html'){
-      displayFilmList();
-      }
+var displayFilmList = function() {
+  let movieTable = $("#movieTable");
+  films.forEach((film, index) => {
+    let tr = $('<tr>');
+    tr.addClass('movieLink');
+    tr.data('index', index);
+    
+    let title = $('<td>');
+    title.text(film.title);
+    
+    let releaseYear = $('<td>');
+    title.text(film.releaseYear);
+    
+    let directors = $('<td>');
+    title.text(film.directors.join(', '));
+    
+    tr.append(title, releaseYear, directors);
+    
+    movieTable.append(tr);
   });
+};
 
-
+$('#movieTable').on('click', '.movieLink', function() {
+  let index = $(this).data('index');
+  let currentMovieName = films[index].title;
+  let currentMovieYear = films[index].releaseYear;
+  displayIndividualFilm(currentMovieName, currentMovieYear, index);
 });
-//URL ripper code ends here
-
-
-  var displayFilmList = function() {
-    for (i=0; i< films.length; i++){
-      $("#movieTable").append('<tr class="movieLink" id="' + [i] + '"><td id="' + films[i].title + '">' + films[i].title + '</td><td class="releaseYear" id="' + films[i].releaseYear + '">' + films[i].releaseYear + '</td><td>' + films[i].directors + '</td></tr>');
-    }
-  };
-
-  $('#movieTable').on('click', '.movieLink', function() {
-    var currentMovieName = $(this).children(":first").attr('id');
-    var currentMovieYear = $(this).children(":first").next().attr('id');
-    var index = $(this).attr('id');
-    displayIndividualFilm(currentMovieName, currentMovieYear, index);
-  });
-
   
-  var displayIndividualFilm = function(movie, year, index) {
+var displayIndividualFilm = function(movie, year, index) {
   displayOMDB(index);
-  };
+};
   
-
-  var displayOMDB = function(index) {
-    $("#movieTable").hide();
-    console.log(films[index]);
-    $("#omdbDisplay").append('<h1 id="movieLabel">Title</h1>');
-    $("#omdbDisplay").append('<h1 id="movieText">' + films[index].title + "</h1>");
-    $("#omdbDisplay").append('<img src="' + films[index].posterURL + '"' + 'alt="Poster" </img>')
-    $("#omdbDisplay").append('<h1 id="movieLabel">Released</h1>');
-    $("#omdbDisplay").append('<h1 id="movieText">' + films[index].releaseDate + "</h1>");
-    $("#omdbDisplay").append('<h1 id="movieLabel">Plot</h1>');
-    $("#omdbDisplay").append('<h1 id="movieText">' + films[index].plot + "</h1>");
-    $("#omdbDisplay").append('<h1 id="movieLabel">Actors</h1>');
-    $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].actors + "</h1>");
-    $("#omdbDisplay").append('<h1 id="movieLabel">Runtime</h1>');
-    $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].runtime + "</h1>");
+var displayOMDB = function(index) {
+  $("#movieTable").hide();
+  console.log(films[index]);
+  $("#omdbDisplay").append('<h1 id="movieLabel">Title</h1>');
+  $("#omdbDisplay").append('<h1 id="movieText">' + films[index].title + "</h1>");
+  $("#omdbDisplay").append('<img src="' + films[index].posterURL + '"' + 'alt="Poster" </img>')
+  $("#omdbDisplay").append('<h1 id="movieLabel">Released</h1>');
+  $("#omdbDisplay").append('<h1 id="movieText">' + films[index].releaseDate + "</h1>");
+  $("#omdbDisplay").append('<h1 id="movieLabel">Plot</h1>');
+  $("#omdbDisplay").append('<h1 id="movieText">' + films[index].plot + "</h1>");
+  $("#omdbDisplay").append('<h1 id="movieLabel">Actors</h1>');
+  $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].actors + "</h1>");
+  $("#omdbDisplay").append('<h1 id="movieLabel">Runtime</h1>');
+  $("#omdbDisplay").append('<h1 id ="movieText">' + films[index].runtime + "</h1>");
 };
 
 
+navSlide();
+loadFilmList().then((filmList) => {
+  films = filmList;
+  console.log(films)
+  if (top.location.pathname === '/movies.html') {
+    displayFilmList();
+  }
+});
