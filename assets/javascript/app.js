@@ -1,36 +1,74 @@
-let downloadLink;
+let pageState = 'home';
 
 let films = [];
 
 function setUpNavbar() {
-  const burger = document.querySelector('.burger');
-  const nav = document.querySelector('.nav-links');
-  const navLinks = document.querySelectorAll('.nav-links li');
+  const burger = $('.burger');
+  const nav = $('.nav-links');
+  const navLinks = $('.nav-links li');
+  const searchBar = $('.search-box');
 
-  burger.addEventListener('click', () => {
-    // Toggle Nav
-    nav.classList.toggle('nav-active');
-
-    // Animate Links
-    navLinks.forEach((link, index) => {
-      console.log('animate nav-links');
-      if (link.style.animation) {
-        link.style.animation = '';
+  function toggleBurger() {
+    if (!nav.hasClass('nav-active')) {
+      nav.addClass('nav-active');
+      switch (pageState) {
+        case 'home':
+          {
+            searchBar.hide();
+          }
+          break;
+        case 'all-films':
+          {
+          }
+          break;
+        case 'film':
+          {
+          }
+          break;
+        case 'contact':
+          {
+          }
+          break;
       }
-      else {
-        link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.3}s`;
-      }
-    });
-
-    // Burger Animation
-    if (searchBar.style.display === 'none') {
-      console.log('checking tb');
-      searchBar.style.display = 'block';
     }
     else {
-      searchBar.style.display = 'none';
+      nav.removeClass('nav-active');
+      switch (pageState) {
+        case 'home':
+          {
+            searchBar.show();
+          }
+          break;
+        case 'all-films':
+          {
+          }
+          break;
+        case 'film':
+          {
+          }
+          break;
+        case 'contact':
+          {
+          }
+          break;
+      }
     }
-  });
+
+    // Animate Links
+    $.each(navLinks, (index, li) => {
+      let navLink = $(li);
+      if (navLink.is(':animated')) {
+        navLink.css('animation', '');
+        navLink.style.animation = '';
+      }
+      else {
+        navLink.css('animation', `navLinkFade 0.5s ease forwards ${index / 7 + 0.3}s`);
+      }
+    });
+  }
+
+  burger.on('click', toggleBurger);
+  navLinks.on('click', toggleBurger);
 }
 
 function searchOMDB(film) {
@@ -241,15 +279,18 @@ function getDownloadUrl(youtubeVideo) {
 
   const params = `url=${ripperUrl}${youtubeVideo.id}`;
 
-  return fetch(apiEndpoint + '?' + params, {
+  const settings = {
     mode    : 'cors',
     headers : {
       'x-rapidapi-host' : 'getvideo.p.rapidapi.com',
       'x-rapidapi-key'  : 'a4aed55e02mshaa114b38bc3f970p11239fjsn6ea45666c466'
     }
-  })
+  };
+
+  return fetch(apiEndpoint + '?' + params, settings)
     .then((response) => response.json())
     .then((jsonResponse) => {
+      console.log(jsonResponse);
       if (jsonResponse.status) {
         const streams = jsonResponse.streams;
         let downloadUrl = streams[0].url;
@@ -353,7 +394,23 @@ $('.search-box').on('submit', (event) => {
   }
 });
 
+$('.homeLink').on('click', (event) => {
+  if (pageState === 'home') return;
+
+  $('#movieTable').empty();
+
+  $('#omdbDisplay').empty();
+  $('#ytDisplay').empty();
+  $('#ytDownload').empty();
+
+  pageState = 'home';
+
+  $('.search-box').show();
+});
+
 $('.allMovieLink').on('click', (event) => {
+  if (pageState === 'all-films') return;
+
   $('.search-box').hide();
 
   $('#omdbDisplay').empty();
@@ -368,23 +425,23 @@ $('.allMovieLink').on('click', (event) => {
     $('#movieTable').append(tr);
   });
 
+  pageState = 'all-films';
+
   $('#movieTable').show();
 });
 
-$('.homeLink').on('click', (event) => {
-  $('#movieTable').empty();
-
-  $('#omdbDisplay').empty();
-  $('#ytDisplay').empty();
-  $('#ytDownload').empty();
-
-  $('.search-box').show();
+$('.contactLink').on('click', (event) => {
+  if (pageState === 'contact') return;
 });
 
 $('#movieTable').on('click', '.movieLink', function() {
   let index = $(this).data('index');
   let film = films[index];
+
   displayFilmPage(film);
+
+  pageState = 'film';
+
   getYoutubeVideos(film)
     .then((videos) => {
       // TODO look through video array
